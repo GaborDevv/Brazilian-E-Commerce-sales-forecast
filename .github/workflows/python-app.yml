@@ -45,13 +45,19 @@ jobs:
           mkdir ~/.kaggle
           echo '{"username":"${{ secrets.KAGGLE_USERNAME }}","key":"${{ secrets.KAGGLE_KEY }}"}' > ~/.kaggle/kaggle.json
           chmod 600 ~/.kaggle/kaggle.json
-        
+
     - name: Check Dataset Last Updated Date
       id: check_date
       run: |
           LAST_UPDATED_ON_KAGGLE=$(kaggle datasets status olistbr/brazilian-ecommerce -v | grep 'lastUpdated' | awk '{print $2}')
           echo "Last updated on Kaggle: $LAST_UPDATED_ON_KAGGLE"
           echo "::set-output name=kaggle_last_updated::$LAST_UPDATED_ON_KAGGLE"
+
+    - name: Ensure last_update.txt exists
+      run: |
+          if [ ! -f ../raw_data/last_update.txt ]; then
+            echo "1900-01-01" > ../raw_data/last_update.txt
+          fi
 
     - name: Compare Dates and Download if Updated
       run: |
