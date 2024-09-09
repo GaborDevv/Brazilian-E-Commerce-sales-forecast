@@ -2,8 +2,8 @@ name: My Python application CI
 
 env:
   MIN_COVERAGE_REQUIRED: 75
-
 on: 
+  workflow_dispatch:
   push:
   pull_request:
     branches: [ "main" ]
