@@ -2,3 +2,4 @@ kaggle
 pandas
 pytest
 pyarrow
+flake8
