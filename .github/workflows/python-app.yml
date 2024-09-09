@@ -1,4 +1,4 @@
-name: My Python application CI/CD
+name: My Python application CI
 
 env:
   MIN_COVERAGE_REQUIRED: 75
@@ -74,6 +74,7 @@ jobs:
             git push
           else
             echo "No update needed."
+          fi
 
     - name: Lint with flake8
       run: |
