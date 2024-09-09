@@ -4,6 +4,11 @@ env:
   MIN_COVERAGE_REQUIRED: 75
 on: 
   workflow_dispatch:
+   inputs:
+      download_dataset:
+        description: 'Redownload dataset from Kaggle? (yes/no)'
+        required: true
+        default: 'no'
   push:
   pull_request:
     branches: [ "main" ]
@@ -37,9 +42,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-    - name: Install jq
-      run: sudo apt-get install jq
-
     - name: Configure Kaggle
       env:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
@@ -49,38 +51,11 @@ jobs:
           echo '{"username":"${{ secrets.KAGGLE_USERNAME }}","key":"${{ secrets.KAGGLE_KEY }}"}' > ~/.kaggle/kaggle.json
           chmod 600 ~/.kaggle/kaggle.json
 
-    - name: Check Dataset Last Updated Date
-      id: check_date
-      run: |
-          mkdir temp_metadata
-          kaggle datasets metadata olistbr/brazilian-ecommerce -p temp_metadata
-          LAST_UPDATED_ON_KAGGLE=$(jq -r '.updatedOn' temp_metadata/dataset-metadata.json)
-          echo "Last updated on Kaggle: $LAST_UPDATED_ON_KAGGLE"
-          echo "::set-output name=kaggle_last_updated::$LAST_UPDATED_ON_KAGGLE"
-          rm -rf temp_metadata
 
-    - name: Ensure last_update.txt exists
+    - name: Download Dataset
+      if: ${{ github.event.inputs.download_dataset == 'yes' }}
       run: |
-          if [ ! -f last_update.txt ]; then
-            echo "1900-01-01" > last_update.txt
-          fi
-
-    - name: Compare Dates and Download if Updated
-      run: |
-          KAGGLE_DATE="${{ steps.check_date.outputs.kaggle_last_updated }}"
-          CACHED_DATE=$(cat last_update.txt)
-          if [[ "$KAGGLE_DATE" > "$CACHED_DATE" ]]; then
-            echo "Dataset has been updated on Kaggle. Downloading new version..."
             kaggle datasets download -d olistbr/brazilian-ecommerce --unzip -p ../raw_data
-            echo "$KAGGLE_DATE" > last_update.txt
-            git config --local user.email "gabortamas.rabai@gmail.com"
-            git config --local user.name "GaborDevv"
-            git add last_update.txt
-            git commit -m "Updated dataset to latest version from Kaggle."
-            git push
-          else
-            echo "No update needed."
-          fi
 
     - name: Lint with flake8
       run: |
