@@ -15,7 +15,14 @@ To-do:
 5. A couple of simple pytest tests, and run them in github actions at every PR.
 6. Configuration files in yml
 
+
+
 Think about the following:
+
 - Which features would you extract and how from the tables? How would you use the remaining tables?
 - How would you turn it into an application in production?
+  UI creation with dashboards
+  ML models with pipelines
 - How would you design an application if you knew that you would have to build a similar solution for a couple other countries, and the data schema might be different for them, however, you can get the same underlying data? 
+  
+
