@@ -1,3 +1,4 @@
 kaggle
-pyspark
 pandas
+pytest
+pyarrow
