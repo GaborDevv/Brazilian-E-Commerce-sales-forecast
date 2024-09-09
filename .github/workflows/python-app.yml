@@ -49,7 +49,7 @@ jobs:
     - name: Check Dataset Last Updated Date
       id: check_date
       run: |
-          LAST_UPDATED_ON_KAGGLE=$(kaggle datasets status olistbr/brazilian-ecommerce -v | grep 'lastUpdated' | awk '{print $2}')
+          LAST_UPDATED_ON_KAGGLE=$(kaggle datasets view olistbr/brazilian-ecommerce | grep 'Last Updated' | awk -F: '{print $2}' | xargs)
           echo "Last updated on Kaggle: $LAST_UPDATED_ON_KAGGLE"
           echo "::set-output name=kaggle_last_updated::$LAST_UPDATED_ON_KAGGLE"
 
