@@ -27,6 +27,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        
     - name: Cache Python dependencies
       uses:
             actions/cache@v3
@@ -35,6 +36,38 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+
+    - name: Configure Kaggle
+      env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+      run: |
+          mkdir ~/.kaggle
+          echo '{"username":"${{ secrets.KAGGLE_USERNAME }}","key":"${{ secrets.KAGGLE_KEY }}"}' > ~/.kaggle/kaggle.json
+          chmod 600 ~/.kaggle/kaggle.json
+        
+    - name: Check Dataset Last Updated Date
+      id: check_date
+      run: |
+          LAST_UPDATED_ON_KAGGLE=$(kaggle datasets status olistbr/brazilian-ecommerce -v | grep 'lastUpdated' | awk '{print $2}')
+          echo "Last updated on Kaggle: $LAST_UPDATED_ON_KAGGLE"
+          echo "::set-output name=kaggle_last_updated::$LAST_UPDATED_ON_KAGGLE"
+
+    - name: Compare Dates and Download if Updated
+      run: |
+          KAGGLE_DATE="${{ steps.check_date.outputs.kaggle_last_updated }}"
+          CACHED_DATE=$(cat last_update.txt)
+          if [[ "$KAGGLE_DATE" > "$CACHED_DATE" ]]; then
+            echo "Dataset has been updated on Kaggle. Downloading new version..."
+            kaggle datasets download -d olistbr/brazilian-ecommerce --unzip -p ../raw_data
+            echo "$KAGGLE_DATE" > last_update.txt
+            git config --local user.email "gabortamas.rabai@gmail.com"
+            git config --local user.name "GaborDevv"
+            git add ../raw_data last_update.txt
+            git commit -m "Updated dataset to latest version from Kaggle."
+            git push
+          else
+            echo "No update needed."
 
     - name: Lint with flake8
       run: |
