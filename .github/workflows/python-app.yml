@@ -55,8 +55,8 @@ jobs:
 
     - name: Ensure last_update.txt exists
       run: |
-          if [ ! -f ../raw_data/last_update.txt ]; then
-            echo "1900-01-01" > ../raw_data/last_update.txt
+          if [ ! -f last_update.txt ]; then
+            echo "1900-01-01" > last_update.txt
           fi
 
     - name: Compare Dates and Download if Updated
@@ -69,7 +69,7 @@ jobs:
             echo "$KAGGLE_DATE" > last_update.txt
             git config --local user.email "gabortamas.rabai@gmail.com"
             git config --local user.name "GaborDevv"
-            git add ../raw_data last_update.txt
+            git add last_update.txt
             git commit -m "Updated dataset to latest version from Kaggle."
             git push
           else
