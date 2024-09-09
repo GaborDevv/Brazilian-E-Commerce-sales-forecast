@@ -34,7 +34,7 @@ jobs:
     - name: Run tests with pytest and coverage
       run: |
         pip install pytest coverage
-        coverage run -m pytest discover
+        coverage run -m pytest
 
     - name: Check coverage percentage
       run: |
