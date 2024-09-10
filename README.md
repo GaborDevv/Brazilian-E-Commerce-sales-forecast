@@ -20,9 +20,13 @@ To-do:
 Think about the following:
 
 - Which features would you extract and how from the tables? How would you use the remaining tables?
+  For feature extraction there is a lot of options. For example if we wanted to create a correlation matrix to see what influences prices and how, we could extract ratings, prices (item price and/or freight price), check for seasonality -> which months have more volume, is there a holiday coming up(e.g. christmas). We could check  sales geographically as well, to check how prices change statewise.
+  
 - How would you turn it into an application in production?
-  UI creation with dashboards
-  ML models with pipelines
-- How would you design an application if you knew that you would have to build a similar solution for a couple other countries, and the data schema might be different for them, however, you can get the same underlying data? 
+  We could possibly create some UI creation with dashboards. For example we could use the Dash framework which is open-source and makes it easier to build data visualization interfaces. 
+  I would create Machine Learning models, pipelines that could populate these dashboards
+
+- How would you design an application if you knew that you would have to build a similar solution for a couple other countries, and the data schema might be different for them, however, you can get the same underlying data?
+  In my gold layer I would use unified schemas for the underlying data, and during my ETL pipeline I would transform the new tables to be able to work with different countries with the same logic.
   
 
