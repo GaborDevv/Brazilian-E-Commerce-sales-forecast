@@ -1,18 +1,20 @@
 from functools import reduce
 import pandas as pd
 import os
+import argparse
 import pyarrow
+from pkg_resources import require
 
 from utils import categorize_columns, capitalize_columns, columns_to_datetime
 
 
 # take a list as param and iterate through it while creating pandas dataframes and putting them into a dictionary
-def load_data(files_list):
+def load_data(path,files_list):
     data_frames = {}
     for file_path in files_list:
         name = file_path.split('/')[-1].replace('.csv', '').replace('olist_', '').replace('_dataset', '')
         var_name = f'data_{name}'
-        data_frames[var_name] = pd.read_csv(file_path)
+        data_frames[var_name] = pd.read_csv(f'{path}/{file_path}')
         print(f"Loaded new DataFrame: {var_name}")
     return data_frames
 
@@ -122,33 +124,38 @@ def write_gold_layer(data_frame, path):
         print(f"Failed to write {data_frame} due to {e}")
 
 
-def main():
+def main(args):
     files_list = [
-        '../raw_data/olist_customers_dataset.csv',
-        '../raw_data/olist_order_items_dataset.csv',
-        '../raw_data/olist_order_payments_dataset.csv',
-        '../raw_data/olist_orders_dataset.csv',
-        '../raw_data/olist_products_dataset.csv',
-        '../raw_data/olist_sellers_dataset.csv',
-        '../raw_data/product_category_name_translation.csv',
-        '../raw_data/olist_order_reviews_dataset.csv'
+        'olist_customers_dataset.csv',
+        'olist_order_items_dataset.csv',
+        'olist_order_payments_dataset.csv',
+        'olist_orders_dataset.csv',
+        'olist_products_dataset.csv',
+        'olist_sellers_dataset.csv',
+        'product_category_name_translation.csv',
+        'olist_order_reviews_dataset.csv'
     ]
-    path = '../bronze_layer'
-    data_frames = load_data(files_list)
+    bronze_path = f'{args.output_folder}/bronze_layer'
+    data_frames = load_data(args.input_folder,files_list)
     fixing_schemas(data_frames)
-    write_bronze_layer(data_frames, path)
+    write_bronze_layer(data_frames, bronze_path)
     clean_data(data_frames)
-    silver_path = '../silver_layer'
+    silver_path = f'{args.output_folder}/silver_layer'
     write_silver_layer(data_frames, silver_path)
     aggregate_data(data_frames)
     big_table = merge_data(data_frames)
 
     print(big_table.dtypes)
 
-    gold_path = '../gold_layer'
+    gold_path = f'{args.output_folder}/gold_layer'
 
     write_gold_layer(big_table, gold_path)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input_folder', type=str, required=False, default='raw_data', help='Directory where the input files are located')
+    parser.add_argument('--output_folder', type=str, required=False, default='storage', help='Directory to save the output Parquet files')
+
+    args = parser.parse_args()
+    main(args)
