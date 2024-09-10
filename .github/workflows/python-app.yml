@@ -2,19 +2,7 @@ name: My Python application CI
 
 env:
   MIN_COVERAGE_REQUIRED: 75
-on: 
-  workflow_dispatch:
-   inputs:
-      download_dataset:
-        description: 'Redownload dataset from Kaggle?'
-        required: true
-        default: 'No'
-        type: choice
-        options:
-          - 'Yes'
-          - 'No'
-        
-  push:
+on:
   pull_request:
     branches: [ "main" ]
     
@@ -46,22 +34,6 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
-    - name: Configure Kaggle
-      if: ${{ github.event.inputs.download_dataset == 'Yes' }}
-      env:
-          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
-          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
-      run: |
-          mkdir ~/.kaggle
-          echo '{"username":"${{ secrets.KAGGLE_USERNAME }}","key":"${{ secrets.KAGGLE_KEY }}"}' > ~/.kaggle/kaggle.json
-          chmod 600 ~/.kaggle/kaggle.json
-
-
-    - name: Download Dataset
-      if: ${{ github.event.inputs.download_dataset == 'Yes' }}
-      run: |
-            kaggle datasets download -d olistbr/brazilian-ecommerce --unzip -p ../raw_data
 
     - name: Lint with flake8
       run: |
