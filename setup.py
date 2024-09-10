@@ -1,5 +1,3 @@
-import filecmp
-import os
 import sys
 import argparse
 import subprocess
@@ -7,12 +5,6 @@ import subprocess
 
 def install_requirements():
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
-
-
-def get_home_directory():
-    """Get the home directory using environment variables."""
-    return os.environ.get('HOME') or os.environ.get('USERPROFILE')
-
 
 def download_dataset(data_location, dataset):
     subprocess.run(['kaggle', 'datasets', 'download', dataset, '-p', data_location, '--unzip'])

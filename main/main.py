@@ -7,8 +7,7 @@ import pyarrow
 
 from utils import categorize_columns, capitalize_columns, columns_to_datetime
 
-
-# take a list as param and iterate through it while creating pandas dataframes and putting them into a dictionary
+'''Take a list as parameter and iterate through it, to read them into pandas dfs and putting the dataframes into a dictionary'''
 def load_data(path, files_list):
     data_frames = {}
     try:
@@ -37,6 +36,7 @@ def fixing_schemas(dataframes):
     categorize_columns(dataframes['data_product_category_name_translation'], 'product_category_name_english')
 
 
+'''Save data to the bronze layer in parquet files'''
 def write_bronze_layer(dict_of_dataframes, path):
     os.makedirs(path, exist_ok=True)  # Ensure the directory exists
     for key, dataframe in dict_of_dataframes.items():
@@ -47,6 +47,7 @@ def write_bronze_layer(dict_of_dataframes, path):
             print(f"Failed to write {key} due to {e}")
 
 
+'''Drop columns that are supposedly not relevant in sales forecast, make city names Title case'''
 def clean_data(data_frames):
     # capitalize city names
     capitalize_columns(data_frames['data_customers'], 'customer_city')
@@ -62,6 +63,7 @@ def clean_data(data_frames):
         inplace=True)
 
 
+'''Save cleaned data to silver layer'''
 def write_silver_layer(dict_of_dataframes, path):
     os.makedirs(path, exist_ok=True)  # Ensure the directory exists
     for key, dataframe in dict_of_dataframes.items():
@@ -72,7 +74,8 @@ def write_silver_layer(dict_of_dataframes, path):
             print(f"Failed to write {key} due to {e}")
 
 
-# aggregate data with duplicate ids
+'''Aggregate the data to make a couple of summarizations, take the mean of duplicated order reviews, check total price,
+ total freight cost of an orders, number of items in an order'''
 def aggregate_data(data_frames):
     data_frames['aggregated_reviews'] = (data_frames['data_order_reviews'].groupby('order_id')
                                          .agg({'review_score': 'mean'}))
@@ -90,6 +93,7 @@ def aggregate_data(data_frames):
     }))
 
 
+'''Create one big table with all the possibly relevant attributes of orders'''
 # merge the necessary tables into one, categorize columns
 def merge_data(data_frames):
     products = pd.merge(
@@ -118,6 +122,7 @@ def merge_data(data_frames):
     return big_table
 
 
+'''Save the final result to gold layer. Partition by product categories. There is too many items to partition on that'''
 def write_gold_layer(data_frame, path):
     # Ensure the directory exists
     os.makedirs(path, exist_ok=True)
@@ -150,15 +155,12 @@ def main(args):
     write_silver_layer(data_frames, silver_path)
     aggregate_data(data_frames)
     big_table = merge_data(data_frames)
-
-    print(big_table.dtypes)
-
     gold_path = f'{args.output_folder}/gold_layer'
-
     write_gold_layer(big_table, gold_path)
 
 
 if __name__ == '__main__':
+    '''Get arguments for source and target folder location'''
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_folder', type=str, required=False, default='raw_data',
                         help='Directory where the input files are located')
