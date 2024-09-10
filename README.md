@@ -37,12 +37,12 @@ The rest of the tables, columns could be used for other predictions, improvement
   
 **- How would you turn it into an application in production?**
 
-  We could possibly create some UI creation with dashboards. For example we could use the Dash framework which is open-source and makes it easier to build data visualization interfaces. 
-  I would create Machine Learning models, pipelines that could populate these dashboards
+  I could possibly create some UI, with dashboards. For example we could use the Dash framework which is open-source and makes it easier to build data visualization interfaces. 
+  I would create Machine Learning models, pipelines that could populate these dashboards, create forecasts, heatmaps for product popularity in cities/states (eg. to optimize storage) 
 
 **- How would you design an application if you knew that you would have to build a similar solution for a couple other countries, and the data schema might be different for them, however, you can get the same underlying data?**
 
-  In my gold layer I would use unified schemas for the underlying data, and during my ETL pipeline I would transform the new tables to be able to work with different countries with the same logic.
+  In my gold layer I would use unified schemas for the underlying data, and during my ETL pipeline I would transform the new tables to be able to work with different countries with the same logic. 
 
   
 **Run the script locally**
