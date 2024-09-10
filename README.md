@@ -32,7 +32,8 @@ I used pandas during the whole ETL because the data size did not require spark.
 
 **- Which features would you extract and how from the tables? How would you use the remaining tables?**  
 
-For feature extraction there is a lot of options. For example if we wanted to create a correlation matrix to see what influences prices and how, we could extract ratings, prices (item price and/or freight price), check for seasonality -> which months have more volume, is there a holiday coming up(e.g. christmas). We could check  sales geographically as well, to check how prices change statewise.
+For feature extraction there is a lot of options. For example if we wanted to create a correlation matrix to see what influences prices and how, we could extract ratings, prices (item price and/or freight price), check for seasonality -> which months have more volume, is there a holiday coming up(e.g. christmas). We could check  sales geographically as well, to check how prices changes correlate with sales volume in states. 
+The rest of the tables, columns could be used for other predictions, improvements. We could build models for logistics with shipping data or we could learn about marketing insights, which region should the company concentrate on with the review data.
   
 **- How would you turn it into an application in production?**
 
