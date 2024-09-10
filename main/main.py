@@ -5,7 +5,8 @@ import pyarrow
 
 from utils import categorize_columns, capitalize_columns, columns_to_datetime
 
-#take a list as param and iterate through it while creating pandas dataframes and putting them into a dictionary
+
+# take a list as param and iterate through it while creating pandas dataframes and putting them into a dictionary
 def load_data(files_list):
     data_frames = {}
     for file_path in files_list:
@@ -17,24 +18,24 @@ def load_data(files_list):
 
 
 def fixing_schemas(dataframes):
-    #parse date columns
+    # parse date columns
     columns_to_datetime(dataframes['data_orders'], [
         'order_purchase_timestamp', 'order_approved_at', 'order_delivered_carrier_date',
         'order_delivered_customer_date', 'order_estimated_delivery_date'
     ])
-    columns_to_datetime(dataframes['data_order_items'],['shipping_limit_date'])
+    columns_to_datetime(dataframes['data_order_items'], ['shipping_limit_date'])
     columns_to_datetime(dataframes['data_order_reviews'], ['review_creation_date', 'review_answer_timestamp'])
-    columns_to_datetime(dataframes['data_order_items'],['shipping_limit_date'])
+    columns_to_datetime(dataframes['data_order_items'], ['shipping_limit_date'])
     categorize_columns(dataframes['data_products'], 'product_category_name')
-    categorize_columns(dataframes['product_category_name_translation'], 'product_category_name')
-    categorize_columns(dataframes['product_category_name_translation'], 'product_category_name_english')
+    categorize_columns(dataframes['data_product_category_name_translation'], 'product_category_name')
+    categorize_columns(dataframes['data_product_category_name_translation'], 'product_category_name_english')
 
 
 def write_bronze_layer(dict_of_dataframes, path):
     os.makedirs(path, exist_ok=True)  # Ensure the directory exists
     for key, dataframe in dict_of_dataframes.items():
         try:
-            dataframe.to_csv(f'{path}/{key}_bronze.csv')
+            dataframe.to_excel(f'{path}/{key}_bronze.csv')
             print(f"DataFrame {key} written to {path}")
         except Exception as e:
             print(f"Failed to write {key} due to {e}")
@@ -46,37 +47,42 @@ def clean_data(data_frames):
     capitalize_columns(data_frames['data_sellers'], 'seller_city')
     # remove unnecessary columns (we are building table for sales forecasts)
     data_frames['data_order_items'].drop('shipping_limit_date', axis=1, inplace=True)
-    data_frames['data_order_payments'].drop(['payment_type', 'payment_sequential', 'payment_installments'], axis=1, inplace=True)
-    data_frames['data_order_reviews'].drop(['review_comment_title','review_comment_message','review_answer_timestamp'], axis=1, inplace=True)
+    data_frames['data_order_payments'].drop(['payment_type', 'payment_sequential', 'payment_installments'], axis=1,
+                                            inplace=True)
+    data_frames['data_order_reviews'].drop(
+        ['review_comment_title', 'review_comment_message', 'review_answer_timestamp'], axis=1, inplace=True)
+    data_frames['data_orders'].drop(['order_delivered_carrier_date','order_delivered_customer_date','order_estimated_delivery_date'], axis=1, inplace=True)
+
 
 def write_silver_layer(dict_of_dataframes, path):
     os.makedirs(path, exist_ok=True)  # Ensure the directory exists
     for key, dataframe in dict_of_dataframes.items():
         try:
-            dataframe.to_csv(f'{path}/{key}_silver.csv')
+            dataframe.to_excel(f'{path}/{key}_silver.csv')
             print(f"DataFrame {key} written to {path}")
         except Exception as e:
             print(f"Failed to write {key} due to {e}")
 
 
-#aggregate data with duplicate ids
+# aggregate data with duplicate ids
 def aggregate_data(data_frames):
     data_frames['aggregated_reviews'] = (data_frames['data_order_reviews'].groupby('order_id')
                                          .agg({'review_score': 'mean'}))
     data_frames['aggregated_order_payments'] = (data_frames['data_order_payments'].groupby('order_id')
                                                 .agg(total_payment=('payment_value', 'sum')))
     data_frames['aggregated_order_items'] = (data_frames['data_order_items'].groupby('order_id')
-                                                .agg({
-                                                    'price': 'sum',
-                                                    'freight_value': 'sum',
-                                                    'order_item_id': 'max',
-                                                }).rename(columns={
-                                                    'price': 'total_order_value',
-                                                    'freight_value': 'total_freight_value',
-                                                    'order_item_id': 'number_of_items_ordered'
-                                                }))
+    .agg({
+        'price': 'sum',
+        'freight_value': 'sum',
+        'order_item_id': 'max',
+    }).rename(columns={
+        'price': 'total_order_value',
+        'freight_value': 'total_freight_value',
+        'order_item_id': 'number_of_items_ordered'
+    }))
 
-#merge the necessary tables into one, categorize columns
+
+# merge the necessary tables into one, categorize columns
 def merge_data(data_frames):
     products = pd.merge(
         data_frames['data_products'], data_frames['data_product_category_name_translation'],
@@ -103,8 +109,9 @@ def merge_data(data_frames):
         ['order_status', 'customer_id', 'customer_unique_id'], axis=1)
     return big_table
 
+
 def write_gold_layer(data_frame, path):
-   # Ensure the directory exists
+    # Ensure the directory exists
     os.makedirs(path, exist_ok=True)
     file_path = f'{path}/big_table_gold.parquet'
     # Write the DataFrame to a Parquet file, partitioned by 'english_category_name'
@@ -128,6 +135,7 @@ def main():
     ]
     path = '../bronze_layer'
     data_frames = load_data(files_list)
+    fixing_schemas(data_frames)
     write_bronze_layer(data_frames, path)
     clean_data(data_frames)
     silver_path = '../silver_layer'
@@ -139,7 +147,8 @@ def main():
 
     gold_path = '../gold_layer'
 
-    write_gold_layer(big_table,gold_path)
+    write_gold_layer(big_table, gold_path)
+
 
 if __name__ == '__main__':
     main()
