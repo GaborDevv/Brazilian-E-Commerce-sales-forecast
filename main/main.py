@@ -35,7 +35,7 @@ def write_bronze_layer(dict_of_dataframes, path):
     os.makedirs(path, exist_ok=True)  # Ensure the directory exists
     for key, dataframe in dict_of_dataframes.items():
         try:
-            dataframe.to_excel(f'{path}/{key}_bronze.csv')
+            dataframe.to_parquet(f'{path}/{key}_bronze.parquet')
             print(f"DataFrame {key} written to {path}")
         except Exception as e:
             print(f"Failed to write {key} due to {e}")
@@ -58,7 +58,7 @@ def write_silver_layer(dict_of_dataframes, path):
     os.makedirs(path, exist_ok=True)  # Ensure the directory exists
     for key, dataframe in dict_of_dataframes.items():
         try:
-            dataframe.to_excel(f'{path}/{key}_silver.csv')
+            dataframe.to_parquet(f'{path}/{key}_silver.parquet')
             print(f"DataFrame {key} written to {path}")
         except Exception as e:
             print(f"Failed to write {key} due to {e}")
