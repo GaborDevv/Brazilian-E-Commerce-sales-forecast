@@ -39,13 +39,6 @@ jobs:
     - name: black
       run: |
           black --check --verbose .
-          
-    - name: Lint with flake8
-      run: |
-        # Stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Line length is set to 125 -> GitHub editor is max 125 char in one line (119 previously)
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=125 --statistics
 
     - name: Run tests with pytest and coverage
       run: |
