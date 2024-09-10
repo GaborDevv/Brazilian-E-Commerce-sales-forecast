@@ -14,12 +14,12 @@ We want a forecast for each item, what are the sales going to be next week.
 
 **Project Status** 
 
-1. Code to load relevant tables for the task (minimum tables needed), and prepare efficient ETL that builds a dataset on which Data Scientist can continue the work (use pandas) 
-2. The output should be in parquet, well partitioned by product
-3. The format of output is a single table that can be used for modelling (no need to extract features).
-4. python script to run code, that you can pass arguments to
-5. A couple of simple pytest tests, and run them in github actions at every PR.
-6. Configuration files in yml
+✅ Code to load relevant tables for the task (minimum tables needed), and prepare efficient ETL that builds a dataset on which Data Scientist can continue the work (use pandas) 
+✅ The output should be in parquet, well partitioned by product
+✅ The format of output is a single table that can be used for modelling (no need to extract features).
+✅ python script to run code, that you can pass arguments to
+✅ A couple of simple pytest tests, and run them in github actions at every PR.
+✅ Configuration files in yml
 
 
 **Think about the following:**
