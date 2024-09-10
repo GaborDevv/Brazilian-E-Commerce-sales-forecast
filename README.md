@@ -50,7 +50,7 @@ python installed to the local environment. It is recommended to create a virtual
 6. **Execute: "python setup.py --dataset_download Yes --data_location <path/to/raw_data>"
 7. ***Execute "python main/main.py --input_folder <path/to/raw_data> --output_folder <path/to/save_folder>
 
-* I included the raw dataset in the repo, so if you dowload that as well, you can skip steps 2-5.
+*I included the raw dataset in the repo, so if you dowload that as well, you can skip steps 2-5.
   
 ** --dataset_download is a **required** argument, you can enter **yes** or **no**. --data_location is not required, default: raw_data folder. This function installs the dependencies and downloads the dataset if needed
 
