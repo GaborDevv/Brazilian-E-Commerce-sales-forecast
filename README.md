@@ -2,13 +2,15 @@
 
 This project uses a Brazilian ecommerce public dataset of orders made at Olist Store. The data has information of 100k orders from 2016 to 2018 made at multiple marketplaces in Brazil. Its features allows viewing an order from multiple dimensions: from order status, price, payment and freight performance to customer location, product attributes and finally reviews written by customers. This is real commercial data, it has been anonymised, and references to the companies and partners in the review text have been replaced with the names of Game of Thrones great houses.
 
-**Link to the dataset**
 
+**Link to the dataset**
 [Brazilian E-Commerce Public Dataset by Olist | Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce/data?select=olist_orders_dataset.csv)
+
 
 **Goal:**
 
 We want a forecast for each item, what are the sales going to be next week.
+
 
 **Project Status** 
 
@@ -18,6 +20,7 @@ We want a forecast for each item, what are the sales going to be next week.
 4. python script to run code, that you can pass arguments to
 5. A couple of simple pytest tests, and run them in github actions at every PR.
 6. Configuration files in yml
+
 
 **Think about the following:**
 
@@ -33,6 +36,7 @@ For feature extraction there is a lot of options. For example if we wanted to cr
 **- How would you design an application if you knew that you would have to build a similar solution for a couple other countries, and the data schema might be different for them, however, you can get the same underlying data?**
 
   In my gold layer I would use unified schemas for the underlying data, and during my ETL pipeline I would transform the new tables to be able to work with different countries with the same logic.
+
   
 **Run the script locally**
 
