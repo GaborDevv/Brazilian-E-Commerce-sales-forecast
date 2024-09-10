@@ -40,8 +40,8 @@ jobs:
       run: |
         # Stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        # Line length is set to 125 -> GitHub editor is max 125 char in one line (119 previously)
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=125 --statistics
 
     - name: Run tests with pytest and coverage
       run: |
