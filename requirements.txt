@@ -2,6 +2,5 @@ pandas
 pytest
 pyarrow
 black
-flake8
 kaggle
 argparse
