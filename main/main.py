@@ -3,13 +3,12 @@ from functools import reduce
 import pandas as pd
 import os
 import argparse
-import pyarrow
 
 from utils import categorize_columns, capitalize_columns, columns_to_datetime
 
 
-# Take a list as parameter and iterate through it, to read them into pandas dfs and putting the dataframes into a dictionary
 def load_data(path, files_list):
+    """Take a list as parameter and iterate through it, to read them into pandas dfs and putting the dataframes into a dictionary"""
     data_frames = {}
     try:
         for file_path in files_list:
@@ -29,7 +28,7 @@ def load_data(path, files_list):
 
 
 def fixing_schemas(dataframes):
-    # parse date columns
+    """converting string columns that contain date to datetime, and categorize product categories"""
     columns_to_datetime(
         dataframes["data_orders"],
         [
@@ -56,9 +55,9 @@ def fixing_schemas(dataframes):
     )
 
 
-# Save data to the bronze layer in parquet files
 def write_bronze_layer(dict_of_dataframes, path):
-    os.makedirs(path, exist_ok=True)  # Ensure the directory exists
+    """Save data to the bronze layer in parquet files"""
+    os.makedirs(path, exist_ok=True)
     for key, dataframe in dict_of_dataframes.items():
         try:
             dataframe.to_parquet(f"{path}/{key}_bronze.parquet")
@@ -67,8 +66,8 @@ def write_bronze_layer(dict_of_dataframes, path):
             print(f"Failed to write {key} due to {e}")
 
 
-# Drop columns that are supposedly not relevant in sales forecast, make city names Title case
 def clean_data(data_frames):
+    """Drop columns that are supposedly not relevant in sales forecast, make city names Title case"""
     # capitalize city names
     capitalize_columns(data_frames["data_customers"], "customer_city")
     capitalize_columns(data_frames["data_sellers"], "seller_city")
@@ -95,9 +94,9 @@ def clean_data(data_frames):
     )
 
 
-# Save cleaned data to silver layer
 def write_silver_layer(dict_of_dataframes, path):
-    os.makedirs(path, exist_ok=True)  # Ensure the directory exists
+    """Save cleaned data to silver layer"""
+    os.makedirs(path, exist_ok=True)
     for key, dataframe in dict_of_dataframes.items():
         try:
             dataframe.to_parquet(f"{path}/{key}_silver.parquet")
@@ -106,9 +105,9 @@ def write_silver_layer(dict_of_dataframes, path):
             print(f"Failed to write {key} due to {e}")
 
 
-# Aggregate the data to make a couple of summarizations, take the mean of duplicated order reviews, check total price,
-# total freight cost of an orders, number of items in an order
 def aggregate_data(data_frames):
+    """Aggregate the data to make a couple of summarizations, take the mean of duplicated order reviews, check total price,
+    total freight cost of an orders, number of items in an order"""
     data_frames["aggregated_reviews"] = (
         data_frames["data_order_reviews"]
         .groupby("order_id")
@@ -139,9 +138,9 @@ def aggregate_data(data_frames):
     )
 
 
-# Create one big table with all the possibly relevant attributes of orders
-# merge the necessary tables into one, categorize columns
 def merge_data(data_frames):
+    """Create one big table with all the possibly relevant attributes of orders
+    merge the necessary tables into one, categorize columns"""
     products = pd.merge(
         data_frames["data_products"],
         data_frames["data_product_category_name_translation"],
@@ -187,12 +186,10 @@ def merge_data(data_frames):
     return big_table
 
 
-# Save the final result to gold layer. Partition by product categories. There is too many items to partition on that
 def write_gold_layer(data_frame, path):
-    # Ensure the directory exists
+    """Save the final result to gold layer. Partition by product categories. There is too many items to partition on that"""
     os.makedirs(path, exist_ok=True)
     file_path = f"{path}/big_table_gold.parquet"
-    # Write the DataFrame to a Parquet file, partitioned by 'english_category_name'
     try:
         data_frame.to_parquet(file_path, partition_cols=["english_category_name"])
         print(f"DataFrame written to {file_path}")

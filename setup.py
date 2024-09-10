@@ -4,18 +4,21 @@ import subprocess
 
 
 def install_requirements():
+    """Install the dependencies that are stored in requirements.txt"""
     subprocess.check_call(
         [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]
     )
 
 
 def download_dataset(data_location, dataset):
+    """download the dataset from kaggle and unzip it to the data_location"""
     subprocess.run(
         ["kaggle", "datasets", "download", dataset, "-p", data_location, "--unzip"]
     )
 
 
 def yes_or_no(value):
+    """validity check for argument"""
     if value.lower() not in ("yes", "no"):
         raise argparse.ArgumentTypeError('Invalid answer, please enter "yes" or "no".')
     return value
