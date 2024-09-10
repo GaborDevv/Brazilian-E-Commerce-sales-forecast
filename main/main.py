@@ -1,22 +1,26 @@
+import sys
 from functools import reduce
 import pandas as pd
 import os
 import argparse
 import pyarrow
-from pkg_resources import require
 
 from utils import categorize_columns, capitalize_columns, columns_to_datetime
 
 
 # take a list as param and iterate through it while creating pandas dataframes and putting them into a dictionary
-def load_data(path,files_list):
+def load_data(path, files_list):
     data_frames = {}
-    for file_path in files_list:
-        name = file_path.split('/')[-1].replace('.csv', '').replace('olist_', '').replace('_dataset', '')
-        var_name = f'data_{name}'
-        data_frames[var_name] = pd.read_csv(f'{path}/{file_path}')
-        print(f"Loaded new DataFrame: {var_name}")
-    return data_frames
+    try:
+        for file_path in files_list:
+            name = file_path.split('/')[-1].replace('.csv', '').replace('olist_', '').replace('_dataset', '')
+            var_name = f'data_{name}'
+            data_frames[var_name] = pd.read_csv(f'{path}/{file_path}')
+            print(f"Loaded new DataFrame: {var_name}")
+        return data_frames
+    except Exception as e:
+        print(f"Failed to load files, reason : {e}")
+        sys.exit(1)
 
 
 def fixing_schemas(dataframes):
@@ -53,7 +57,9 @@ def clean_data(data_frames):
                                             inplace=True)
     data_frames['data_order_reviews'].drop(
         ['review_comment_title', 'review_comment_message', 'review_answer_timestamp'], axis=1, inplace=True)
-    data_frames['data_orders'].drop(['order_delivered_carrier_date','order_delivered_customer_date','order_estimated_delivery_date'], axis=1, inplace=True)
+    data_frames['data_orders'].drop(
+        ['order_delivered_carrier_date', 'order_delivered_customer_date', 'order_estimated_delivery_date'], axis=1,
+        inplace=True)
 
 
 def write_silver_layer(dict_of_dataframes, path):
@@ -136,7 +142,7 @@ def main(args):
         'olist_order_reviews_dataset.csv'
     ]
     bronze_path = f'{args.output_folder}/bronze_layer'
-    data_frames = load_data(args.input_folder,files_list)
+    data_frames = load_data(args.input_folder, files_list)
     fixing_schemas(data_frames)
     write_bronze_layer(data_frames, bronze_path)
     clean_data(data_frames)
@@ -154,8 +160,9 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_folder', type=str, required=False, default='raw_data', help='Directory where the input files are located')
-    parser.add_argument('--output_folder', type=str, required=False, default='storage', help='Directory to save the output Parquet files')
-
+    parser.add_argument('--input_folder', type=str, required=False, default='raw_data',
+                        help='Directory where the input files are located')
+    parser.add_argument('--output_folder', type=str, required=False, default='storage',
+                        help='Directory to save the output Parquet files')
     args = parser.parse_args()
     main(args)
