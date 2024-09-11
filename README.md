@@ -56,22 +56,23 @@
   4. *In your home folder create a .kaggle folder
   5. *Add the downloaded .json file to this .kaggle folder
   6. **Execute:
-    ```sh
-    python setup.py --dataset_download Yes --data_location <path/to/raw_data>
-    ```
-  7. ***Execute
-   ```sh
-   python main/main.py --input_folder <path/to/raw_data> --output_folder <path/to/save_folder>
-   ```
+
+```sh
+python setup.py --dataset_download Yes --data_location <path/to/raw_data>
+```
+  7. ***Execute:
+```sh 
+python main/main.py --input_folder <path/to/raw_data> --output_folder <path/to/save_folder>
+```
 
   *I included the raw dataset in the repo, so if you dowload that as well, you can skip steps 2-5. In step 6. run the script like this:
   ```sh 
   python setup.py --dataset_download No --data_location <path/to/raw_data>
   ```
     
-  ** --dataset_download is a **required** argument, you can enter **yes** or **no**. --data_location is not required, default: raw_data folder. This function installs the dependencies and downloads the dataset if needed
+  ** ``` --dataset_download``` is a **required** argument, you can enter **yes** or **no**. ```--data_location``` is not required, default: ```--data_location raw_data folder``` . This function installs the dependencies and downloads the dataset if needed.
   
-  *** Both arguments are **optional**, default: --input_folder raw_data (location of source folder), --output_folder storage (location of target folder)
+  *** Both arguments are **optional**, default: ```--input_folder raw_data <location_of_source_folder>```, ```--output_folder storage <location_of_target_folder>```
   
   **ER diagram of the tables ingested into the bronze layer**
   ![image](https://github.com/user-attachments/assets/416296e3-3f93-4739-b116-3dc9cf7bb55a)
