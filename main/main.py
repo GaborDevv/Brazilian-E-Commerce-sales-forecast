@@ -233,7 +233,11 @@ def main(args):
 def arg_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--config_file", type=str, required=False, default="param_config.yaml", help="Path to the configuration file"
+        "--config_file",
+        type=str,
+        required=False,
+        default="param_config.yaml",
+        help="Path to the configuration file",
     )
     arguments = parser.parse_args()
     return arguments
