@@ -3,9 +3,13 @@ from functools import reduce
 import pandas as pd
 import os
 import argparse
+import logging
 
 from utils import categorize_columns, capitalize_columns, columns_to_datetime
 
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+log = logging.getLogger('main')
 
 def load_data(path, files_list):
     """Take a list as parameter and iterate through it, to read them into pandas dfs and putting the dataframes into a dictionary"""
@@ -20,10 +24,10 @@ def load_data(path, files_list):
             )
             var_name = f"data_{name}"
             data_frames[var_name] = pd.read_csv(f"{path}/{file_path}")
-            print(f"Loaded new DataFrame: {var_name}")
+            log.info(f"Loaded new DataFrame: {var_name}")
         return data_frames
     except Exception as e:
-        print(f"Failed to load files, reason : {e}")
+        log.critical(f"Failed to load files, reason : {e}")
         sys.exit(1)
 
 
@@ -61,9 +65,9 @@ def write_bronze_layer(dict_of_dataframes, path):
     for key, dataframe in dict_of_dataframes.items():
         try:
             dataframe.to_parquet(f"{path}/{key}_bronze.parquet")
-            print(f"DataFrame {key} written to {path}")
+            log.info(f"DataFrame {key} written to {path}")
         except Exception as e:
-            print(f"Failed to write {key} due to {e}")
+            log.error(f"Failed to write {key} due to {e}")
 
 
 def clean_data(data_frames):
@@ -100,9 +104,9 @@ def write_silver_layer(dict_of_dataframes, path):
     for key, dataframe in dict_of_dataframes.items():
         try:
             dataframe.to_parquet(f"{path}/{key}_silver.parquet")
-            print(f"DataFrame {key} written to {path}")
+            log.info(f"DataFrame {key} written to {path}")
         except Exception as e:
-            print(f"Failed to write {key} due to {e}")
+            log.error(f"Failed to write {key} due to {e}")
 
 
 def aggregate_data(data_frames):
@@ -192,9 +196,9 @@ def write_gold_layer(data_frame, path):
     file_path = f"{path}/big_table_gold.parquet"
     try:
         data_frame.to_parquet(file_path, partition_cols=["english_category_name"])
-        print(f"DataFrame written to {file_path}")
+        log.info(f"DataFrame written to {file_path}")
     except Exception as e:
-        print(f"Failed to write {data_frame} due to {e}")
+        log.error(f"Failed to write {data_frame} due to {e}")
 
 
 def main(args):
@@ -220,9 +224,7 @@ def main(args):
     gold_path = f"{args.output_folder}/gold_layer"
     write_gold_layer(big_table, gold_path)
 
-
-if __name__ == "__main__":
-    # Get arguments for source and target folder location
+def arg_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--input_folder",
@@ -238,5 +240,12 @@ if __name__ == "__main__":
         default="storage",
         help="Directory to save the output Parquet files",
     )
-    args = parser.parse_args()
+    arguments = parser.parse_args()
+    return arguments
+
+
+if __name__ == "__main__":
+    # Get arguments for source and target folder location
+    args = arg_parser()
     main(args)
+
