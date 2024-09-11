@@ -26,9 +26,7 @@ def test_load_config():
     try:
         config = load_config(temp_config_path)
 
-        assert (
-            config == config_data
-        ), "Loaded data is not the same"
+        assert config == config_data, "Loaded data is not the same"
 
     finally:
         os.remove(temp_config_path)
