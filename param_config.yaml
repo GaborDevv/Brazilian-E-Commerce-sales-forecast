@@ -1,11 +1,15 @@
-#Configurations for main/main.py script
+# Configurations for main/main.py script
 paths:
+  # path to the source data
   input_folder: "raw_data"
+  # path to the desired target folder
   output_folder: "storage"
+  # folder names inside the output folder
   bronze_layer: "bronze_layer"
   silver_layer: "silver_layer"
   gold_layer: "gold_layer"
 
+# List of files that we need to ingest
 files:
   - "olist_customers_dataset.csv"
   - "olist_order_items_dataset.csv"
@@ -16,5 +20,6 @@ files:
   - "product_category_name_translation.csv"
   - "olist_order_reviews_dataset.csv"
 
+# list of columns that we want to partition the final table when we write it to a parquet file
 partition_columns:
   - "english_category_name"
