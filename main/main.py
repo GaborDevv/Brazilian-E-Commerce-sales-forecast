@@ -1,15 +1,24 @@
 import sys
+from email.policy import default
 from functools import reduce
 import pandas as pd
 import os
 import argparse
 import logging
+import yaml
 
 from utils import categorize_columns, capitalize_columns, columns_to_datetime
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+log = logging.getLogger("main")
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-log = logging.getLogger('main')
+
+def load_config(config_path):
+    with open(config_path, "r") as file:
+        return yaml.safe_load(file)
+
 
 def load_data(path, files_list):
     """Take a list as parameter and iterate through it, to read them into pandas dfs and putting the dataframes into a dictionary"""
@@ -190,55 +199,41 @@ def merge_data(data_frames):
     return big_table
 
 
-def write_gold_layer(data_frame, path):
+def write_gold_layer(data_frame, path, partition_on):
     """Save the final result to gold layer. Partition by product categories. There is too many items to partition on that"""
     os.makedirs(path, exist_ok=True)
     file_path = f"{path}/big_table_gold.parquet"
     try:
-        data_frame.to_parquet(file_path, partition_cols=["english_category_name"])
+        data_frame.to_parquet(file_path, partition_cols=partition_on)
         log.info(f"DataFrame written to {file_path}")
     except Exception as e:
         log.error(f"Failed to write {data_frame} due to {e}")
 
 
 def main(args):
-    files_list = [
-        "olist_customers_dataset.csv",
-        "olist_order_items_dataset.csv",
-        "olist_order_payments_dataset.csv",
-        "olist_orders_dataset.csv",
-        "olist_products_dataset.csv",
-        "olist_sellers_dataset.csv",
-        "product_category_name_translation.csv",
-        "olist_order_reviews_dataset.csv",
-    ]
-    bronze_path = f"{args.output_folder}/bronze_layer"
-    data_frames = load_data(args.input_folder, files_list)
+    config = load_config(args.config_file)
+    files_list = config["files"]
+    input_folder = config["paths"]["input_folder"]
+    output_folder = config["paths"]["output_folder"]
+
+    bronze_path = f"{output_folder}/{config['paths']['bronze_layer']}"
+    data_frames = load_data(input_folder, files_list)
     fixing_schemas(data_frames)
     write_bronze_layer(data_frames, bronze_path)
     clean_data(data_frames)
-    silver_path = f"{args.output_folder}/silver_layer"
+    silver_path = f"{output_folder}/{config['paths']['silver_layer']}"
     write_silver_layer(data_frames, silver_path)
     aggregate_data(data_frames)
     big_table = merge_data(data_frames)
-    gold_path = f"{args.output_folder}/gold_layer"
-    write_gold_layer(big_table, gold_path)
+    gold_path = f"{output_folder}/{config['paths']['gold_layer']}"
+    partition_cols = config["partition_columns"]
+    write_gold_layer(big_table, gold_path, partition_cols)
+
 
 def arg_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--input_folder",
-        type=str,
-        required=False,
-        default="raw_data",
-        help="Directory where the input files are located",
-    )
-    parser.add_argument(
-        "--output_folder",
-        type=str,
-        required=False,
-        default="storage",
-        help="Directory to save the output Parquet files",
+        "--config_file", type=str, required=False, default="param_config.yaml", help="Path to the configuration file"
     )
     arguments = parser.parse_args()
     return arguments
@@ -248,4 +243,3 @@ if __name__ == "__main__":
     # Get arguments for source and target folder location
     args = arg_parser()
     main(args)
-

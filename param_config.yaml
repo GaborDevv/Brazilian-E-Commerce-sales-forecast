@@ -1,0 +1,21 @@
+# config.yaml
+
+paths:
+  input_folder: "raw_data"
+  output_folder: "storage"
+  bronze_layer: "bronze_layer"
+  silver_layer: "silver_layer"
+  gold_layer: "gold_layer"
+
+files:
+  - "olist_customers_dataset.csv"
+  - "olist_order_items_dataset.csv"
+  - "olist_order_payments_dataset.csv"
+  - "olist_orders_dataset.csv"
+  - "olist_products_dataset.csv"
+  - "olist_sellers_dataset.csv"
+  - "product_category_name_translation.csv"
+  - "olist_order_reviews_dataset.csv"
+
+partition_columns:
+  - "english_category_name"
