@@ -54,8 +54,10 @@ python installed to the local environment. It is recommended to create a virtual
 3. *Create and download your API key
 4. *In your home folder create a .kaggle folder
 5. *Add the downloaded .json file to this .kaggle folder
-6. **Execute: "python setup.py --dataset_download Yes --data_location <path/to/raw_data>"
-7. ***Execute "python main/main.py --input_folder <path/to/raw_data> --output_folder <path/to/save_folder>
+6. **Execute: '''sh
+7. python setup.py --dataset_download Yes --data_location <path/to/raw_data>'''
+8. ***Execute '''sh
+9. python main/main.py --input_folder <path/to/raw_data> --output_folder <path/to/save_folder>'''
 
 *I included the raw dataset in the repo, so if you dowload that as well, you can skip steps 2-5. In step 6. run the script with --dataset_download No
   
