@@ -1,5 +1,4 @@
-# config.yaml
-
+#Configurations for main/main.py script
 paths:
   input_folder: "raw_data"
   output_folder: "storage"

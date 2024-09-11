@@ -40,7 +40,7 @@ influences prices and how, we could extract ratings, prices (item price and/or f
 which months have more volume, is there a holiday coming up(e.g. christmas). We could check sales geographically as
 well, to check how prices changes correlate with sales volume in states.
 The rest of the tables, columns could be used for other predictions, improvements. We could build models for logistics
-with shipping data or we could learn about marketing insights, which region should the company concentrate on with the
+with shipping data, or we could learn about marketing insights, which region should the company concentrate on with the
 review data.
 
 ### **- How would you turn it into an application in production?**

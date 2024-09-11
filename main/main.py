@@ -1,5 +1,4 @@
 import sys
-from email.policy import default
 from functools import reduce
 import pandas as pd
 import os
