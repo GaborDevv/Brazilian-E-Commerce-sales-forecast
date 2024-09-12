@@ -6,7 +6,12 @@ import argparse
 import logging
 import yaml
 
-from utils import categorize_columns, capitalize_columns, columns_to_datetime
+from utils import (
+    categorize_columns,
+    capitalize_columns,
+    columns_to_datetime,
+    column_dropper,
+)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -43,27 +48,30 @@ def fixing_schemas(dataframes):
     """converting string columns that contain date to datetime, and categorize product categories"""
     columns_to_datetime(
         dataframes["data_orders"],
-        [
+        dataframes["data_order_items"],
+        dataframes["data_order_reviews"],
+        dataframes["data_order_items"],
+        col1=[
+            "order_purchase_timestamp",
+            "order_approved_at",
+            "order_delivered_carrier_date",
+            "order_delivered_customer_date",
+            "order_estimated_delivery_date",
             "order_purchase_timestamp",
             "order_approved_at",
             "order_delivered_carrier_date",
             "order_delivered_customer_date",
             "order_estimated_delivery_date",
         ],
-    )
-    columns_to_datetime(dataframes["data_order_items"], ["shipping_limit_date"])
-    columns_to_datetime(
-        dataframes["data_order_reviews"],
-        ["review_creation_date", "review_answer_timestamp"],
-    )
-    columns_to_datetime(dataframes["data_order_items"], ["shipping_limit_date"])
-    categorize_columns(dataframes["data_products"], "product_category_name")
-    categorize_columns(
-        dataframes["data_product_category_name_translation"], "product_category_name"
+        col2=["shipping_limit_date"],
+        col3=["review_creation_date", "review_answer_timestamp"],
+        col4=["shipping_limit_date"],
     )
     categorize_columns(
+        dataframes["data_products"],
         dataframes["data_product_category_name_translation"],
-        "product_category_name_english",
+        col1=["product_category_name"],
+        col2=["product_category_name", "product_category_name_english"],
     )
 
 
@@ -81,28 +89,30 @@ def write_bronze_layer(dict_of_dataframes, path):
 def clean_data(data_frames):
     """Drop columns that are supposedly not relevant in sales forecast, make city names Title case"""
     # capitalize city names
-    capitalize_columns(data_frames["data_customers"], "customer_city")
-    capitalize_columns(data_frames["data_sellers"], "seller_city")
+    capitalize_columns(
+        data_frames["data_customers"],
+        data_frames["data_sellers"],
+        col1="customer_city",
+        col2="seller_city",
+    )
     # remove unnecessary columns (we are building table for sales forecasts)
-    data_frames["data_order_items"].drop("shipping_limit_date", axis=1, inplace=True)
-    data_frames["data_order_payments"].drop(
-        ["payment_type", "payment_sequential", "payment_installments"],
-        axis=1,
-        inplace=True,
-    )
-    data_frames["data_order_reviews"].drop(
-        ["review_comment_title", "review_comment_message", "review_answer_timestamp"],
-        axis=1,
-        inplace=True,
-    )
-    data_frames["data_orders"].drop(
-        [
+    column_dropper(
+        data_frames["data_order_items"],
+        data_frames["data_order_payments"],
+        data_frames["data_order_reviews"],
+        data_frames["data_orders"],
+        col1=["shipping_limit_date"],
+        col2=["payment_type", "payment_sequential", "payment_installments"],
+        col3=[
+            "review_comment_title",
+            "review_comment_message",
+            "review_answer_timestamp",
+        ],
+        col4=[
             "order_delivered_carrier_date",
             "order_delivered_customer_date",
             "order_estimated_delivery_date",
         ],
-        axis=1,
-        inplace=True,
     )
 
 
@@ -195,6 +205,7 @@ def merge_data(data_frames):
     big_table = pd.merge(
         with_customers_df, products, on="product_id", how="inner"
     ).drop(["order_status", "customer_id", "customer_unique_id"], axis=1)
+    categorize_columns(big_table, col1="original_category_name")
     return big_table
 
 
@@ -227,6 +238,7 @@ def main(args):
     gold_path = f"{output_folder}/{config['paths']['gold_layer']}"
     partition_cols = config["partition_columns"]
     write_gold_layer(big_table, gold_path, partition_cols)
+    print(big_table.dtypes)
 
 
 def arg_parser():
