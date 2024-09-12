@@ -8,8 +8,11 @@
 /dataSources.local.xml
 # Zeppelin ignored files
 /ZeppelinRemoteNotebooks/
+#coverage report
 .coverage
+#storage
+/storage
 .idea/
 __pycache__/
 *.ipynb
-storage/
+

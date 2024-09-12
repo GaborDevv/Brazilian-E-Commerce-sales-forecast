@@ -64,13 +64,26 @@ python installed to the local environment. It is recommended to create a virtual
 script.
 
 ### Steps
-
 1. Copy the repository
-2. *[Create a kaggle account](https://www.kaggle.com/account/login?phase=startRegisterTab&returnUrl=%2F), if you don't
+
+[NOTE]
+
+I have prepared the raw dataset in advance, so it is not needed to download it again. If for some reason you want to
+download data for yourself I have created a guide(Step 2-6). Otherwise, navigate to the project root folder and run:
+```sh
+pip install -r requirements.txt
+``` 
+or 
+```sh
+python setup.py --dataset_download No
+```
+and jump to step 7.
+
+2. [Create a kaggle account](https://www.kaggle.com/account/login?phase=startRegisterTab&returnUrl=%2F), if you don't
    have one already
-3. *Create and download your API key
-4. *In your home folder create a .kaggle folder
-5. *Add the downloaded .json file to this .kaggle folder
+3. Create and download your API key
+4. In your home folder create a .kaggle folder
+5. Add the downloaded .json file to this .kaggle folder
 6. **Execute:
 ```sh
    python setup.py --dataset_download Yes --data_location <path/to/raw_data>
@@ -85,11 +98,6 @@ script.
 coverage run -m pytest
 ```
 
-*I included the raw dataset in the repo, so if you download that as well, you can skip steps 2-5. In step 6. run the
-script like this:
-```sh
-python setup.py --dataset_download No --data_location <path/to/raw_data>
-```
 
 ** `--dataset_download` is a **required** argument, you can enter **yes** or **no**. `--data_location` is not required,
 default: `--data_location raw_data`. This function installs the dependencies and downloads the dataset if needed
