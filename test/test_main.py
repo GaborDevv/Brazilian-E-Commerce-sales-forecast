@@ -58,6 +58,42 @@ def sample_data_frames():
     }
 
 
+@pytest.fixture
+def config_data():
+    return {
+        "files": ["file1.csv", "file2.csv"],
+        "paths": {
+            "input_folder": "/path/to/input",
+            "output_folder": "/path/to/output",
+            "bronze_layer": "bronze",
+            "silver_layer": "silver",
+            "gold_layer": "gold",
+        },
+        "partition_columns": ["product_category"],
+    }
+
+
+@pytest.fixture
+def csv_data():
+    return """col1,col2
+1,2
+3,4
+"""
+
+
+@pytest.fixture
+def csv_file(csv_data):
+    # Create a temporary file in the current directory
+    with tempfile.NamedTemporaryFile(
+        delete=False, mode="w+t", suffix=".csv", newline="", dir="."
+    ) as temp:
+        temp.write(csv_data)
+    # Yield the filename only
+    yield os.path.basename(temp.name)
+    # Remove the file after the test
+    os.remove(temp.name)
+
+
 def test_load_config():
     """Create a temporary YAML file for testing, load it and check if it's the same when loaded with load_config"""
     config_data = {
@@ -76,7 +112,6 @@ def test_load_config():
 
     try:
         config = load_config(temp_config_path)
-
         assert config == config_data, "Loaded data is not the same"
 
     finally:
@@ -111,27 +146,6 @@ def test_arg_parser_help(capsys):
         assert "--config_file" in captured.out
 
 
-@pytest.fixture
-def csv_data():
-    return """col1,col2
-1,2
-3,4
-"""
-
-
-@pytest.fixture
-def csv_file(csv_data):
-    # Create a temporary file in the current directory
-    with tempfile.NamedTemporaryFile(
-        delete=False, mode="w+t", suffix=".csv", newline="", dir="."
-    ) as temp:
-        temp.write(csv_data)
-    # Yield the filename only
-    yield os.path.basename(temp.name)
-    # Remove the file after the test
-    os.remove(temp.name)
-
-
 def test_load_data(csv_file):
     # Use the current directory as the base path
     base_path = "."
@@ -151,21 +165,6 @@ def test_load_data(csv_file):
     assert all(
         isinstance(df, pd.DataFrame) for df in data_frames.values()
     ), "Not all values are DataFrames"
-
-
-@pytest.fixture
-def config_data():
-    return {
-        "files": ["file1.csv", "file2.csv"],
-        "paths": {
-            "input_folder": "/path/to/input",
-            "output_folder": "/path/to/output",
-            "bronze_layer": "bronze",
-            "silver_layer": "silver",
-            "gold_layer": "gold",
-        },
-        "partition_columns": ["product_category"],
-    }
 
 
 @patch("builtins.open")
@@ -217,10 +216,10 @@ def test_write_gold_layer(mock_to_parquet, mock_makedirs, sample_data_frame):
     # Call the function with the sample DataFrame
     write_gold_layer(sample_data_frame, path, partition_on)
 
-    # Check if the directory creation method was called
+    # Check if the directory creation method works
     mock_makedirs.assert_called_once_with(path, exist_ok=True)
 
-    # Check if the to_parquet method was called correctly
+    # Check if the to_parquet method is working properly
     file_path = f"{path}/big_table_gold.parquet"
     mock_to_parquet.assert_called_once_with(file_path, partition_cols=partition_on)
 
