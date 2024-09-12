@@ -12,3 +12,7 @@
 .coverage
 #storage
 /storage
+.idea/
+__pycache__/
+*.ipynb
+

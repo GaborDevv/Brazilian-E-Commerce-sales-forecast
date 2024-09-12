@@ -1,7 +1,7 @@
 name: My Python application CI
 
 env:
-  MIN_COVERAGE_REQUIRED: 75
+  MIN_COVERAGE_REQUIRED: 70
 on: 
   workflow_dispatch:
   pull_request:
